@@ -201,7 +201,7 @@ class App
                 if ($handler instanceof \Closure) {
                     $handler = $handler->bindTo($this);
                 }
-                $handler();
+                $handler($all);
                 $flag = true;
                 break;
             }
