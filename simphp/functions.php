@@ -24,12 +24,6 @@ function send_email($to, $title, $content)
     return $mail->send();
 }
 
-//完整的路径
-function url($str)
-{
-    return __ROOT__ . '/' . MODULE . '.php/' . $str;
-}
-
 /**
  * @return string
  * 生成唯一id,理论唯一
