@@ -1,6 +1,6 @@
 <?php
 defined('ROOT_PATH') or define('ROOT_PATH', dirname(__DIR__) . '/');
-defined('__ROOT__') or define('__ROOT__', dirname($_SERVER['SCRIPT_NAME']) . '/');
+defined('__ROOT__') or define('__ROOT__', dirname($_SERVER['SCRIPT_NAME']));
 include __DIR__ . '/functions.php';
 
 
