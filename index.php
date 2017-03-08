@@ -5,6 +5,7 @@ $app = new \simphp\App();
 
 $app->get('/', function () {
     echo phpversion();
+    p_const();
 });
 
 $app->run();

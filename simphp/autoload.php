@@ -1,5 +1,6 @@
 <?php
 defined('ROOT_PATH') or define('ROOT_PATH', dirname(__DIR__) . '/');
+defined('__ROOT__') or define('__ROOT__', dirname($_SERVER['SCRIPT_NAME']) . '/');
 include __DIR__ . '/functions.php';
 
 
@@ -15,4 +16,16 @@ spl_autoload_register(function ($name) {
         include $includePath . str_replace('\\', '/', $name) . '.php';
         break;
     }
+});
+
+set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+    p_log('--------------------');
+    p_log(error_get_last());
+    p_log($errfile . '[' . $errline . ']:' . $errstr);
+});
+
+set_exception_handler(function ($e) {
+    p_log('--------------------');
+    p_log(error_get_last());
+    p_log('[' . $e->getLine() . ']:' . $e->getMessage());
 });

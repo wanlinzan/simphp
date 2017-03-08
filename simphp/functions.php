@@ -1,4 +1,17 @@
 <?php
+/**
+ * @param $str
+ * @param string $dir
+ * 调试打印信息到文件中
+ */
+function p_log($str)
+{
+    $str = print_r($str, true);
+    $filename = dirname(__DIR__) . '/' . date("Ymd") . '.log';
+    $fp = fopen($filename, 'a+');
+    fwrite($fp, $str . "\r\n");
+    fclose($fp);
+}
 
 function send_email($to, $title, $content)
 {
