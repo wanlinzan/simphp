@@ -179,8 +179,16 @@ class App
     public function run()
     {
         //获取 action
-        $action = explode('&', $_SERVER['QUERY_STRING']);
-        $action = empty($action[0]) || $_SERVER['QUERY_STRING'][0] != '/' ? '/' : $action[0];
+        if (isset($_SERVER['PATH_INFO'])) {
+            if ($_SERVER['PATH_INFO'] == '') {
+                $action = '/';
+            } else {
+                $action = $_SERVER['PATH_INFO'];
+            }
+        } else {
+            $action = explode('&', $_SERVER['QUERY_STRING']);
+            $action = empty($action[0]) || $_SERVER['QUERY_STRING'][0] != '/' ? '/' : $action[0];
+        }
 
         //请求方式
         $method = $_SERVER['REQUEST_METHOD'];

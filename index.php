@@ -22,4 +22,18 @@ $app->get('/schoolList', function () {
     $this->ajax($return);
 });
 
+$app->get('/', function () {
+
+    $data = [
+        'unionid' => 'oiTCLt7sZwBVY3HQ3IU0gdys1e3Q',
+        'names' => [
+            '2017年广州中考模拟志愿填报',
+            '21天口语计划'
+        ]
+    ];
+    $result = simphp\Http::post('http://mp.weixin.gzpeiyou.com/index/api/batchUserTag', json_encode($data,JSON_UNESCAPED_UNICODE));
+
+    p($result);
+});
+
 $app->run();
