@@ -5,7 +5,7 @@ class App
 {
 
     //框架版本
-    protected $_version = '0.1';
+    protected $_version = '1.0';
 
     //配置项
     protected $_config = [];
