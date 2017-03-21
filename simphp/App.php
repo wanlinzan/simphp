@@ -179,20 +179,9 @@ class App
     public function run()
     {
         //获取 action
-        if (isset($_SERVER['PATH_INFO'])) {
-            if ($_SERVER['PATH_INFO'] == '') {
-                $action = '/';
-            } else {
-                $action = $_SERVER['PATH_INFO'];
-            }
-        } else {
-            $action = explode('&', $_SERVER['QUERY_STRING']);
-            $action = empty($action[0]) || $_SERVER['QUERY_STRING'][0] != '/' ? '/' : $action[0];
-        }
-
+        $action = (!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO']))  ? '/' : $_SERVER['PATH_INFO'];
         //请求方式
         $method = $_SERVER['REQUEST_METHOD'];
-
         //路由查找
         $route_keys = array_keys($this->_routes[$method]);
         $flag = false;
@@ -218,6 +207,4 @@ class App
             $this->_httpErrors['NotFound']();
         }
     }
-
-
 }
