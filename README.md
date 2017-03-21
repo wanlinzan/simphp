@@ -21,4 +21,4 @@ $app->run();
 $ php -S localhost:8000
 ```
 
-访问 http://localhost:8000/hello/world 将会显示 "Hello, world"。
+访问 http://localhost:8000/hello/world.html 将会显示 "Hello, world"。
