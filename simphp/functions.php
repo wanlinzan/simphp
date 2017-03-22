@@ -1,7 +1,17 @@
 <?php
 /**
+ * @param $data
+ * 打印信息到控制台
+ */
+function console_log($data)
+{
+    echo '<script>';
+    echo 'console.log(' . json_encode($data) . ')';
+    echo '</script>';
+}
+
+/**
  * @param $str
- * @param string $dir
  * 调试打印信息到文件中
  */
 function p_log($str)
@@ -196,14 +206,14 @@ function session($name = false, $value = false)
 {
     if (is_null($name)) {
         $_SESSION = array();
-      //清除内存中的
+        //清除内存中的
         session_unset();
         session_destroy();
     } else if (is_null($value)) {
-      //删除session值
+        //删除session值
         unset($_SESSION[$name]);
     } else if (false === $name) {
-     //设置session
+        //设置session
         return $_SESSION;
     } else if (false === $value) {
         //获取session值

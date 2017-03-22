@@ -1,9 +1,9 @@
 <?php
 defined('ROOT_PATH') or define('ROOT_PATH', dirname(__DIR__) . '/');
+defined('__PROTOCOL__') or define('__PROTOCOL__', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https://' : 'http://');
 defined('__ROOT__') or define('__ROOT__', dirname($_SERVER['SCRIPT_NAME']));
-defined('__PROTOCOL__') or define('__PROTOCOL__',(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https://' : 'http://');
-defined('__REAL_ROOT__') or define('__REAL_ROOT__',__PROTOCOL__ . $_SERVER['HTTP_HOST'].__ROOT__);
-defined('__CURRENT__') or define('__CURRENT__',__PROTOCOL__ . $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+defined('__REAL_ROOT__') or define('__REAL_ROOT__', __PROTOCOL__ . $_SERVER['HTTP_HOST'] . __ROOT__);
+defined('__CURRENT__') or define('__CURRENT__', __PROTOCOL__ . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
 
 include __DIR__ . '/functions.php';
 

@@ -5,7 +5,7 @@ $app = new \simphp\App();
 
 $app->get('/test', function () {
 
-    p_const();
+    phpinfo();
 
 });
 
