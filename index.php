@@ -7,10 +7,12 @@ $app = new \simphp\App();
 $app->get('/', function ($args) {
 
 
+//    $image = \org\Image::createFromFilename('https://www.baidu.com/img/bd_logo1.png');
+    $image = \org\Image::createFromFilename('38.jpg');
 
-    $image = \org\Image::createFromFilename('https://www.baidu.com/img/bd_logo1.png');
+//    p($image);
 
-    p($image->crop(0,0,20,20));
+    $image->thumb(400,400)->save(ROOT_PATH.'AAA.PNG');
 
 });
 
