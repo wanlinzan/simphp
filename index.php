@@ -3,31 +3,15 @@ session_start();
 include './simphp/autoload.php';
 $app = new \simphp\App();
 
-$app->get('/test', function () {
 
-    $str = '<xml>
-  <appid><![CDATA[wx2421b1c4370ec43b]]></appid>
-  <attach><![CDATA[支付测试]]></attach>
-  <bank_type><![CDATA[CFT]]></bank_type>
-  <fee_type><![CDATA[CNY]]></fee_type>
-  <is_subscribe><![CDATA[Y]]></is_subscribe>
-  <mch_id><![CDATA[10000100]]></mch_id>
-  <nonce_str><![CDATA[5d2b6c2a8db53831f7eda20af46e531c]]></nonce_str>
-  <openid><![CDATA[oUpF8uMEb4qRXf22hE3X68TekukE]]></openid>
-  <out_trade_no><![CDATA[1409811653]]></out_trade_no>
-  <result_code><![CDATA[SUCCESS]]></result_code>
-  <return_code><![CDATA[SUCCESS]]></return_code>
-  <sign><![CDATA[B552ED6B279343CB493C5DD0D78AB241]]></sign>
-  <sub_mch_id><![CDATA[10000100]]></sub_mch_id>
-  <time_end><![CDATA[20140903131540]]></time_end>
-  <total_fee>1</total_fee>
-  <trade_type><![CDATA[JSAPI]]></trade_type>
-  <transaction_id><![CDATA[1004400740201409030005092168]]></transaction_id>
-</xml>';
+$app->get('/', function ($args) {
 
-    $data = simplexml_load_string($str,'SimpleXMLElement', LIBXML_NOCDATA);
-    console_log($data);
-    p($data);
+
+
+    $image = \org\Image::createFromFilename('https://www.baidu.com/img/bd_logo1.png');
+
+    p($image->crop(0,0,20,20));
+
 });
 
 $app->run();
