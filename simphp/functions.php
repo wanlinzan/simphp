@@ -3,10 +3,13 @@
  * @param $data
  * 打印信息到控制台
  */
-function console_log($data)
+function console_log($data = null)
 {
+    if (is_null($data)) {
+        $data = get_defined_vars();
+    }
     echo '<script>';
-    echo 'console.log(' . json_encode($data) . ')';
+    echo 'console.log(' . json_encode($data, JSON_UNESCAPED_UNICODE) . ')';
     echo '</script>';
 }
 
