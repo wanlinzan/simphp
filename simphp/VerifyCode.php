@@ -1,25 +1,26 @@
 <?php
 namespace simphp;
 /**
- * Class Code
- * @package System
  * 验证码类
+ * Class VerifyCode
+ * @package simphp
  */
-class VerificationCode
+class VerifyCode
 {
-    private $width = 80;
-    private $height = 30;
-    private $background = array(255, 255, 255);
-    private $len = 4;
-    private $fontSize = 20;
-    private $fontFile = null;
     //画布
     private $canvas = null;
+
     //字符串
     private $code = null;
 
+    //配置信息
     private $_config = [
-        'fontFile' => ''
+        'fontFile' => '',
+        'fontSize' => 20,
+        'width' => 80,
+        'height' => 30,
+        'background' => [255, 255, 255],
+        'len' => 4
     ];
 
     public function __construct($config = [])
@@ -34,43 +35,43 @@ class VerificationCode
 
     public function width($width)
     {
-        $this->width = $width;
+        $this->_config['width'] = $width;
         return $this;
     }
 
     public function height($height)
     {
-        if ($this->height < 22) {
+        if ($this->_config['height'] < 22) {
             throw new \Exception('高度不能小于22px');
         }
-        $this->height = $height;
+        $this->_config['height'] = $height;
         return $this;
     }
 
     public function background($background)
     {
-        $this->background = $background;
+        $this->_config['background'] = $background;
         return $this;
     }
 
     public function len($len)
     {
-        $this->len = $len;
+        $this->_config['len'] = $len;
         return $this;
     }
 
     public function fontSize($fontSize)
     {
-        $this->fontSize = $fontSize;
+        $this->_config['fontSize'] = $fontSize;
         return $this;
     }
 
     //创建画布
     private function createCanvas()
     {
-        $this->canvas = imagecreatetruecolor($this->width, $this->height);
+        $this->canvas = imagecreatetruecolor($this->_config['width'], $this->_config['height']);
         $color = imagecolorallocate($this->canvas,
-            $this->background[0], $this->background[1], $this->background[2]);
+            $this->_config['background'][0], $this->_config['background'][1], $this->_config['background'][2]);
         imagefill($this->canvas, 0, 0, $color);
         return $this;
     }
@@ -83,13 +84,13 @@ class VerificationCode
         }
         //画线
         $color = imagecolorallocate($this->canvas, 220, 220, 220);
-        for ($i = 1, $l = $this->height / 5; $i < $l; $i++) {
+        for ($i = 1, $l = $this->_config['height'] / 5; $i < $l; $i++) {
             $step = $i * 5;
-            imageline($this->canvas, 0, $step, $this->width, $step, $color);
+            imageline($this->canvas, 0, $step, $this->_config['width'], $step, $color);
         }
-        for ($i = 1, $l = $this->width / 10; $i < $l; $i++) {
+        for ($i = 1, $l = $this->_config['width'] / 10; $i < $l; $i++) {
             $step = $i * 10;
-            imageline($this->canvas, $step, 0, $step, $this->height, $color);
+            imageline($this->canvas, $step, 0, $step, $this->_config['height'], $color);
         }
         return $this;
     }
@@ -99,7 +100,7 @@ class VerificationCode
     {
         $color = imagecolorallocate($this->canvas, mt_rand(50, 155), mt_rand(50, 155), mt_rand(50, 155));
         for ($i = 0; $i < 50; $i++) {
-            imagesetpixel($this->canvas, mt_rand(0, $this->width), mt_rand(0, $this->height), $color);
+            imagesetpixel($this->canvas, mt_rand(0, $this->_config['width']), mt_rand(0, $this->_config['height']), $color);
         }
         return $this;
     }
@@ -109,8 +110,7 @@ class VerificationCode
     {
         $color = imagecolorallocate($this->canvas, mt_rand(50, 155), mt_rand(50, 155), mt_rand(50, 155));
         for ($i = 0; $i < 10; $i++) {
-            imageline($this->canvas, mt_rand(0, $this->width),
-                mt_rand(0, $this->height), mt_rand(0, $this->width), mt_rand(0, $this->height), $color);
+            imageline($this->canvas, mt_rand(0, $this->_config['width']), mt_rand(0, $this->_config['height']), mt_rand(0, $this->_config['width']), mt_rand(0, $this->_config['height']), $color);
         }
         return $this;
     }
@@ -121,10 +121,10 @@ class VerificationCode
         $color = imagecolorallocate($this->canvas, mt_rand(50, 155), mt_rand(50, 155), mt_rand(50, 155));
         for ($i = 0; $i < 5; $i++) {
             imagearc($this->canvas,
-                mt_rand(0, $this->width),
-                mt_rand(0, $this->height),
-                mt_rand(0, $this->width),
-                mt_rand(0, $this->height),
+                mt_rand(0, $this->_config['width']),
+                mt_rand(0, $this->_config['height']),
+                mt_rand(0, $this->_config['width']),
+                mt_rand(0, $this->_config['height']),
                 mt_rand(0, 160),
                 mt_rand(0, 200),
                 $color);
@@ -139,7 +139,7 @@ class VerificationCode
         $codeStr = '23456789abcdefghjkmnpqrstuvwsyz';
         $codeLen = strlen($codeStr);
         $code = '';
-        for ($i = 0; $i < $this->len; $i++) {
+        for ($i = 0; $i < $this->_config['len']; $i++) {
             $code .= $codeStr[mt_rand(0, $codeLen - 1)];
         }
         $this->code = $code;
@@ -153,18 +153,18 @@ class VerificationCode
         if (is_null($this->code)) {
             throw new \Exception('请先生成字符串');
         }
-        $x = ($this->width - 10) / $this->len;
-        for ($i = 0; $i < $this->len; $i++) {
+        $x = ($this->_config['width'] - 10) / $this->_config['len'];
+        for ($i = 0; $i < $this->_config['len']; $i++) {
             $color = imagecolorallocate($this->canvas, mt_rand(50, 155), mt_rand(50, 155), mt_rand(50, 155));
             imagettftext(
                 $this->canvas,
-                $this->fontSize,
+                $this->_config['fontSize'],
                 mt_rand(-30, 30),
-//            0,
                 $x * $i + mt_rand(6, 10),
-//                mt_rand($this->height / 1.3, $this->height - 5),
-                mt_rand(20, $this->height - ($this->fontSize / 10.0)),
-                $color,  $this->_config['fontFile'], $this->code[$i]
+                mt_rand(20, $this->_config['height'] - ($this->_config['fontSize'] / 10.0)),
+                $color,
+                $this->_config['fontFile'],
+                $this->code[$i]
             );
         }
         return $this;
@@ -173,8 +173,7 @@ class VerificationCode
     //显示验证码
     public function show()
     {
-        $this->createCanvas()->drawLine()->generateCode()->writeCode()
-            ->drawRandomLine()->drawPixel()->drawArc();
+        $this->createCanvas()->drawLine()->generateCode()->writeCode()->drawRandomLine()->drawPixel()->drawArc();
         imagesetthickness($this->canvas, 1);//// 设置画线宽度
         header('Content-type:image/png');
         imagepng($this->canvas);

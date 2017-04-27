@@ -5,7 +5,8 @@ $app = new \simphp\App();
 
 
 $app->get('/', function () {
-
+    $code = new \simphp\VerifyCode();
+    $code->show();
 });
 
 $app->run();
