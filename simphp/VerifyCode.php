@@ -15,7 +15,7 @@ class VerifyCode
 
     //配置信息
     private $_config = [
-        'fontFile' => '',
+        'fontFile' => __DIR__ . '/CodeFont.ttf',
         'fontSize' => 20,
         'width' => 80,
         'height' => 30,
@@ -25,9 +25,7 @@ class VerifyCode
 
     public function __construct($config = [])
     {
-        if ($this->_config['fontFile'] == '') {
-            $this->_config['fontFile'] = __DIR__ . '/CodeFont.ttf';
-        }
+        $this->_config = array_merge($this->_config, $config);
         if (!file_exists($this->_config['fontFile'])) {
             throw new \Exception('字体文件不存在');
         }
