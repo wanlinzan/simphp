@@ -130,6 +130,21 @@ class App
         return $this;
     }
 
+    //告诉浏览器断开连接
+    public function disconnect($data)
+    {
+        if (is_array($data)) {
+            $data = json_encode($data, JSON_UNESCAPED_UNICODE);
+        }
+        echo $data;
+        $size = ob_get_length();
+        header('Content-Type:application/json; charset=utf-8');
+        header("Content-Length: $size");  //告诉浏览器数据长度,浏览器接收到此长度数据后就不再接收数据
+        header("Connection: Close");      //告诉浏览器关闭当前连接,即为短连接
+        ob_flush();
+        flush();
+    }
+
 
     //ajax方法，用于输出数据
     public function ajax(array $data)
@@ -179,7 +194,7 @@ class App
     public function run()
     {
         //获取 action
-        $action = (!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO']))  ? '/' : $_SERVER['PATH_INFO'];
+        $action = (!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO'])) ? '/' : $_SERVER['PATH_INFO'];
         //请求方式
         $method = $_SERVER['REQUEST_METHOD'];
         //路由查找
