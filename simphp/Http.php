@@ -3,6 +3,7 @@ namespace simphp;
 class Http
 {
 
+    //需要结果的get请求
     public static function get($url)
     {
         $ch = curl_init($url);
@@ -30,6 +31,7 @@ class Http
     }
 
 
+    //需要结果的post请求
     public static function post($url, $data = null)
     {
         $ch = curl_init($url);
@@ -73,6 +75,36 @@ class Http
         } else {
             return $result;
         }
+    }
+
+
+    //无需等待结果的get请求
+    public static function s_get($url)
+    {
+        $url_data = parse_url($url);
+        $new_url = isset($url_data['path']) ? $url_data['path'] : '/';
+        if (isset($url_data['query'])) {
+            $new_url .= '?' . $url_data['query'];
+        }
+        $fp = fsockopen($url_data['host'], isset($url_data['port']) ? $url_data['port'] : 80, $error, $errstr, 1);
+        $http = "GET {$new_url} HTTP/1.1\r\nHost: {$url_data['host']}\r\n\r\n";
+        fwrite($fp, $http);
+        fclose($fp);
+    }
+
+    //无需等待结果的post请求
+    public static function s_post($url, $data = [])
+    {
+        $url_data = parse_url($url);
+        $new_url = isset($url_data['path']) ? $url_data['path'] : '/';
+        if (isset($url_data['query'])) {
+            $new_url .= '?' . $url_data['query'];
+        }
+        $fp = fsockopen($url_data['host'], isset($url_data['port']) ? $url_data['port'] : 80, $error, $errstr, 1);
+        $data = http_build_query($data);
+        $http = "POST {$new_url} HTTP/1.1\r\nHost: {$url_data['host']}\r\nContent-type: application/x-www-form-urlencoded\r\nContent-Length: " . strlen($data) . "\r\nConnection:close\r\n\r\n{$data}\r\n\r\n";
+        fwrite($fp, $http);
+        fclose($fp);
     }
 
 }
