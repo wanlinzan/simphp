@@ -16,8 +16,11 @@ spl_autoload_register(function ($name) {
         dirname(__DIR__) . '/'//框架目录中，只有在框架根目录不在网站根目录情况下起作用
     ];
     foreach ($includePaths as $includePath) {
-        include $includePath . str_replace('\\', '/', $name) . '.php';
-        break;
+        $filename = $includePath . str_replace('\\', '/', $name) . '.php';
+        if(file_exists($filename)){
+            include $includePath . str_replace('\\', '/', $name) . '.php';
+            break;
+        }
     }
 });
 
