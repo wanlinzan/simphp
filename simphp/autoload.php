@@ -9,6 +9,11 @@ defined('LOG_WRITE') or define('LOG_WRITE', true);
 
 include __DIR__ . '/functions.php';
 
+
+//初始化配置文件
+file_exists(ROOT_PATH.'config.php') and config(include ROOT_PATH.'config.php');
+
+
 //自动加载框架simphp目录下的类
 spl_autoload_register(function ($name) {
     $includePaths = [
