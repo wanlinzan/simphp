@@ -1,4 +1,5 @@
 <?php
+
 namespace simphp;
 /**
  * 单文件上传类
@@ -25,9 +26,9 @@ class Upload
 
     public function __construct($uploadDir = '', $exts = array(), $size = 0)
     {
-        $this->uploadDir =  $uploadDir . '/';
+        $this->uploadDir = rtrim($uploadDir . '/') . '/';
         if (!file_exists($this->uploadDir)) {
-            if(false === mkdir($this->uploadDir, 0700, true)){
+            if (false === mkdir($this->uploadDir, 0700, true)) {
                 throw new \Exception('目录创建失败');
             }
         }
@@ -42,7 +43,7 @@ class Upload
      * @throws \Exception
      * 给的是$_FILES['name'],必须是单文件上传模式的表单name
      */
-    public function upload($file,$filename = null)
+    public function upload($file, $filename = null)
     {
         $this->uploadFile = $file;
 
@@ -59,10 +60,10 @@ class Upload
         $this->checkException();
 
         //生成文件名
-        if(!is_null($filename)){
-            $new_name = $filename.'.'.$this->uploadFile['ext'];
-        }else{
-            $new_name = str_replace('.', '', uniqid('', true)).'.'.$this->uploadFile['ext'];
+        if (!is_null($filename)) {
+            $new_name = $filename . '.' . $this->uploadFile['ext'];
+        } else {
+            $new_name = str_replace('.', '', uniqid('', true)) . '.' . $this->uploadFile['ext'];
         }
 
 
@@ -95,6 +96,7 @@ class Upload
         }
         return $this;
     }
+
     //检查文件的后缀
     private function checkExt()
     {
