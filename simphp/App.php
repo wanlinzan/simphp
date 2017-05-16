@@ -206,7 +206,7 @@ class App
                 //执行中间件中的处理函数
                 foreach ($this->_middleware as $middleware) {
                     $middleware = $middleware->bindTo($this);
-                    $middleware($route_key,$action);
+                    $middleware($route_key,$all);
                 }
 
                 $handler = $this->_routes[$method][$route_key];
