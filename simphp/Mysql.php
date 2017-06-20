@@ -89,22 +89,22 @@ class Mysql
         $this->exec($sql);
     }
 
-    public function select($sql)
+    public function select($sql,$data = [])
     {
-        $this->exec($sql);
+        $this->exec($sql,$data);
         return $this->_stmp->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public function find($sql)
+    public function find($sql,$data = [])
     {
-        $this->exec($sql);
+        $this->exec($sql,$data);
         $result = $this->_stmp->fetch(\PDO::FETCH_ASSOC);
         return $result ? $result : [];
     }
 
-    public function field($sql)
+    public function field($sql,$data = [])
     {
-        $this->exec($sql);
+        $this->exec($sql,$data);
         $result = $this->_stmp->fetch(\PDO::FETCH_ASSOC);
         return is_array($result) ? current($result) : '';
     }
