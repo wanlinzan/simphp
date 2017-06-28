@@ -16,7 +16,7 @@ $app->get('/hello/(\w+).html', function ($args) {
 $app->run();
 ```
 
-你可以使用PHP内容的服务器快速测试:
+你可以使用PHP内置的服务器快速测试:
 ```bash
 $ php -S localhost:8000
 ```
