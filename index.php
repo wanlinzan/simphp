@@ -6,6 +6,7 @@ $app = new \simphp\App();
 
 
 $app->get('/', function () {
+    
     p_const();
 });
 
