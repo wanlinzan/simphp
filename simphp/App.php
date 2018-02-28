@@ -1,4 +1,5 @@
 <?php
+
 namespace simphp;
 
 class App
@@ -153,11 +154,22 @@ class App
         exit(json_encode($data, JSON_UNESCAPED_UNICODE));
     }
 
+    //输出数据
+    public function result($code, $message, $otherData)
+    {
+        $data = [
+            'code' => $code,
+            'msg' => $message
+        ];
+        $data = array_merge($data, $otherData);
+        $this->ajax($data);
+    }
+
     //ajax的快捷方法
     public function success($message, $url = null)
     {
         $data = [
-            'code' => 1,
+            'code' => 0,
             'msg' => $message
         ];
         if (!is_null($url)) {
@@ -170,7 +182,7 @@ class App
     public function error($message, $url = null)
     {
         $data = [
-            'code' => 0,
+            'code' => 1,
             'msg' => $message
         ];
         if (!is_null($url)) {
@@ -206,7 +218,7 @@ class App
                 //执行中间件中的处理函数
                 foreach ($this->_middleware as $middleware) {
                     $middleware = $middleware->bindTo($this);
-                    $middleware($route_key,$all);
+                    $middleware($route_key, $all);
                 }
 
                 $handler = $this->_routes[$method][$route_key];
