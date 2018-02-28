@@ -34,8 +34,10 @@ spl_autoload_register(function ($name) {
 });
 
 if (DEBUG) {
+    ini_set('display_errors', true);
     error_reporting(E_ALL);
 } else if (LOG_WRITE) {
+    ini_set('display_errors', false);
     error_reporting(0);
     set_error_handler(function ($errno, $errstr, $errfile, $errline) {
         p_log('--------------------');
