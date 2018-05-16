@@ -154,42 +154,33 @@ class App
         exit(json_encode($data, JSON_UNESCAPED_UNICODE));
     }
 
-    //输出数据
-    public function result($code, $message, $otherData)
+    //ajax的快捷方法
+    public function success($data = [])
     {
-        $data = [
-            'code' => $code,
-            'msg' => $message
-        ];
-        $data = array_merge($data, $otherData);
-        $this->ajax($data);
+        $this->ajax( [
+            'status' => 'success',
+            'data' => $data
+        ]);
     }
 
     //ajax的快捷方法
-    public function success($message, $url = null)
+    public function fail($data = [])
     {
-        $data = [
-            'code' => 0,
-            'msg' => $message
-        ];
-        if (!is_null($url)) {
-            $data['url'] = $url;
-        }
-        $this->ajax($data);
+        $this->ajax( [
+            'status' => 'fail',
+            'data' => $data
+        ]);
     }
 
     //ajax的快捷方法
-    public function error($message, $url = null)
+    public function error($message)
     {
-        $data = [
-            'code' => 1,
-            'msg' => $message
-        ];
-        if (!is_null($url)) {
-            $data['url'] = $url;
-        }
-        $this->ajax($data);
+        $this->ajax( [
+            'status' => 'error',
+            'message' => $message
+        ]);
     }
+
 
     //重定向
     public function redirect($url)
