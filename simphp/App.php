@@ -206,7 +206,7 @@ class App
     public function run()
     {
         //获取 action
-        $action = (!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO'])) ? '/' : $_SERVER['PATH_INFO'];
+        $action = (!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO'])) ? '/' : rtrim($_SERVER['PATH_INFO'], '/');
         //请求方式
         $method = $_SERVER['REQUEST_METHOD'];
         //路由查找

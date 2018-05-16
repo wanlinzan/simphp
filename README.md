@@ -5,7 +5,7 @@ SimPHP 是一个简单而强大的PHP开发框架，他可以帮助你快速开�
 ```php
 <?php
 
-require './simphp/App.php';
+require './simphp/autoload.php';
 
 $app = new simphp\App();
 
