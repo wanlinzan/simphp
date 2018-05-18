@@ -155,19 +155,11 @@ class App
     }
 
     //ajax的快捷方法
-    public function success($data = [])
+    public function success($message = '', $data = [])
     {
-        $this->ajax( [
+        $this->ajax([
             'status' => 'success',
-            'data' => $data
-        ]);
-    }
-
-    //ajax的快捷方法
-    public function fail($data = [])
-    {
-        $this->ajax( [
-            'status' => 'fail',
+            'message' => $message,
             'data' => $data
         ]);
     }
@@ -175,7 +167,7 @@ class App
     //ajax的快捷方法
     public function error($message)
     {
-        $this->ajax( [
+        $this->ajax([
             'status' => 'error',
             'message' => $message
         ]);
