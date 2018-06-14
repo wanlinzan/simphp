@@ -191,7 +191,7 @@ class App
         //获取 action
         if (isset($_SERVER['REQUEST_URI'])) {
             $params = parse_url($_SERVER['REQUEST_URI']);
-            $action = isset($uri['path']) ? rtrim($params['path'], '/') : '/';
+            $action = isset($params['path']) ? rtrim($params['path'], '/') : '/';
             if (isset($_SERVER['SCRIPT_NAME'][0])) {
                 if (strpos($action, $_SERVER['SCRIPT_NAME']) === 0) {
                     $action = (string)substr($action, strlen($_SERVER['SCRIPT_NAME']));
