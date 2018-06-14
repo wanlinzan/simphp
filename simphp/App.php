@@ -195,14 +195,13 @@ class App
             if (isset($_SERVER['SCRIPT_NAME'][0])) {
                 if (strpos($action, $_SERVER['SCRIPT_NAME']) === 0) {
                     $action = (string)substr($action, strlen($_SERVER['SCRIPT_NAME']));
-                } elseif (strpos($action, dirname($_SERVER['SCRIPT_NAME'])) === 0) {
+                } elseif (strpos($action, dirname($_SERVER['SCRIPT_NAME'])) === 0 && dirname($_SERVER['SCRIPT_NAME']) != '/') {
                     $action = (string)substr($action, strlen(dirname($_SERVER['SCRIPT_NAME'])));
                 }
             }
         } else {
             $action = '/';
         }
-
 //        $action = (!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO'])) ? '/' : rtrim($_SERVER['PATH_INFO'], '/');
 
 
