@@ -144,6 +144,7 @@ class App
         header("Connection: Close");      //告诉浏览器关闭当前连接,即为短连接
         ob_flush();
         flush();
+        fastcgi_finish_request();
     }
 
 
