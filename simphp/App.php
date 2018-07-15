@@ -190,9 +190,25 @@ class App
     public function run()
     {
         //获取 action
-        $action = (!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO'])) ? '/' : rtrim($_SERVER['PATH_INFO'], '/');
+        if (isset($_SERVER['REQUEST_URI'])) {
+            $params = parse_url($_SERVER['REQUEST_URI']);
+            $action = isset($params['path']) ? rtrim($params['path'], '/') : '/';
+            if (isset($_SERVER['SCRIPT_NAME'][0])) {
+                if (strpos($action, $_SERVER['SCRIPT_NAME']) === 0) {
+                    $action = (string)substr($action, strlen($_SERVER['SCRIPT_NAME']));
+                } elseif (strpos($action, dirname($_SERVER['SCRIPT_NAME'])) === 0) {
+                    $action = (string)substr($action, strlen(dirname($_SERVER['SCRIPT_NAME'])));
+                }
+            }
+        } else {
+            $action = '/';
+        }
+
+//        $action = (!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO'])) ? '/' : rtrim($_SERVER['PATH_INFO'], '/');
+
+
         //请求方式
-        $method = $_SERVER['REQUEST_METHOD'];
+        $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
         //路由查找
         $route_keys = array_keys($this->_routes[$method]);
         $flag = false;
