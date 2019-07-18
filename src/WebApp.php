@@ -4,13 +4,6 @@ namespace Simphp;
 
 class WebApp
 {
-
-    /**
-     * 框架版本
-     * @var string
-     */
-    protected $_version = 'Simphp 1.0';
-
     /**
      * 配置项
      * @var array
@@ -21,13 +14,13 @@ class WebApp
      * 中间件
      * @var array
      */
-    protected $_middlewares = [];
+    protected $_middleware = [];
 
     /**
-     * 对象树
+     * 依赖注入
      * @var array
      */
-    protected $_objectTree = [];
+    protected $_dependency_injections = [];
 
     /**
      * 当前路由前缀
@@ -39,7 +32,7 @@ class WebApp
      * 当前路由需要绑定的中间件
      * @var array
      */
-    protected $_current_route_middlewares = [];
+    protected $_current_route_middleware = [];
 
     /**
      * 所有的路由
@@ -60,40 +53,25 @@ class WebApp
     }
 
     /**
-     * 设置对象到对象树中
+     * 依赖注入
      * @param $name
      * @param $object
      * @return $this
      */
-    public function setObject($name, $object)
+    public function setDependencyInjection($name, $object)
     {
-        $this->_objectTree[$name] = $object;
+        $this->_dependency_injections[$name] = $object;
         return $this;
     }
 
     /**
-     * 快速获取对象树中的对象
-     * @param $name
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        if (isset($this->_objectTree[$name])) {
-            return $this->_objectTree[$name];
-        } else {
-            $this->error($name . '对象不存在');
-            return false;
-        }
-    }
-
-    /**
      * 添加中间件
-     * @param callable $handle
+     * @param $handle
      * @return $this
      */
-    public function addMiddleware(callable $handle)
+    public function addMiddleware($handle)
     {
-        $this->_middlewares[] = $handle;
+        $this->_middleware[] = $handle;
         return $this;
     }
 
@@ -101,90 +79,84 @@ class WebApp
      * get 路由快捷方法
      * @param $route
      * @param $handle
-     * @param array $middlewares
-     * @return $this
+     * @param array $middleware
      */
-    public function get($route, $handle, $middlewares = [])
+    public function get($route, $handle, $middleware = [])
     {
-        $this->map(['GET'], $route, $handle, $middlewares);
-        return $this;
+        $middleware = (array)$middleware;
+        $this->map(['GET'], $route, $handle, $middleware);
     }
 
     /**
      * post 路由快捷方法
      * @param $route
      * @param $handle
-     * @param array $middlewares
-     * @return $this
+     * @param array $middleware
      */
-    public function post($route, $handle, $middlewares = [])
+    public function post($route, $handle, $middleware = [])
     {
-        $this->map(['POST'], $route, $handle, $middlewares);
-        return $this;
+        $middleware = (array)$middleware;
+        $this->map(['POST'], $route, $handle, $middleware);
     }
 
     /**
      * put 路由快捷方法
      * @param $route
      * @param $handle
-     * @param array $middlewares
-     * @return $this
+     * @param array $middleware
      */
-    public function put($route, $handle, $middlewares = [])
+    public function put($route, $handle, $middleware = [])
     {
-        $this->map(['PUT'], $route, $handle, $middlewares);
-        return $this;
+        $middleware = (array)$middleware;
+        $this->map(['PUT'], $route, $handle, $middleware);
     }
 
     /**
      * patch 路由快捷方法
      * @param $route
      * @param $handle
-     * @param array $middlewares
-     * @return $this
+     * @param array $middleware
      */
-    public function patch($route, $handle, $middlewares = [])
+    public function patch($route, $handle, $middleware = [])
     {
-        $this->map(['PATCH'], $route, $handle, $middlewares);
-        return $this;
+        $middleware = (array)$middleware;
+        $this->map(['PATCH'], $route, $handle, $middleware);
     }
 
     /**
      * delete 路由快捷方法
      * @param $route
      * @param $handle
-     * @param array $middlewares
-     * @return $this
+     * @param array $middleware
      */
-    public function delete($route, $handle, $middlewares = [])
+    public function delete($route, $handle, $middleware = [])
     {
-        $this->map(['DELETE'], $route, $handle, $middlewares);
-        return $this;
+        $middleware = (array)$middleware;
+        $this->map(['DELETE'], $route, $handle, $middleware);
     }
 
     /**
      * options 路由快捷方法
      * @param $route
      * @param $handle
-     * @param array $middlewares
-     * @return $this
+     * @param array $middleware
      */
-    public function options($route, $handle, $middlewares = [])
+    public function options($route, $handle, $middleware = [])
     {
-        $this->map(['OPTIONS'], $route, $handle, $middlewares);
-        return $this;
+        $middleware = (array)$middleware;
+        $this->map(['OPTIONS'], $route, $handle, $middleware);
     }
 
     /**
      * any 路由快捷方法
      * @param $route
      * @param $handle
-     * @return $this
+     * @param array $middleware
      */
-    public function any($route, $handle)
+    public function any($route, $handle, $middleware = [])
     {
-        $this->map(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], $route, $handle);
-        return $this;
+        $middleware = (array)$middleware;
+        $this->map(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], $route, $handle, $middleware);
     }
 
     /**
@@ -192,42 +164,40 @@ class WebApp
      * @param array $methods
      * @param $route
      * @param $handle
-     * @param array $middlewares
-     * @return $this
+     * @param array $middleware
      */
-    public function map(array $methods, $route, $handle, $middlewares = [])
+    public function map(array $methods, $route, $handle, $middleware = [])
     {
+        $middleware = (array)$middleware;
         foreach ($methods as $method) {
             $this->_routes[$method][$this->_current_route_prefix . $route] = [
                 'handle' => $handle,
-                'middlewares' => array_merge($middlewares, $this->_current_route_middlewares)
+                'middleware' => array_merge($middleware, $this->_current_route_middleware)
             ];
         }
-        return $this;
     }
 
     /**
      * 路由分组
      * @param $route
      * @param callable $handle
-     * @param array $middlewares
-     * @return $this
+     * @param array $middleware
      */
-    public function group($route, callable $handle, $middlewares = [])
+    public function group($route, callable $handle, $middleware = [])
     {
+        $middleware = (array)$middleware;
         // 路由
         $temp_route_prefix = $this->_current_route_prefix;
         $this->_current_route_prefix .= $route;
 
         // 中间件
-        $temp_route_middlewares = $this->_current_route_middlewares;
-        $this->_current_route_middlewares = array_merge($this->_current_route_middlewares, $middlewares);
+        $temp_route_middleware = $this->_current_route_middleware;
+        $this->_current_route_middleware = array_merge($this->_current_route_middleware, $middleware);
 
         $handle($this, $route);
 
-        $this->_current_route_middlewares = $temp_route_middlewares;
+        $this->_current_route_middleware = $temp_route_middleware;
         $this->_current_route_prefix = $temp_route_prefix;
-        return $this;
     }
 
     /**
@@ -235,7 +205,7 @@ class WebApp
      * @param array $data
      * @return string
      */
-    public function ajax(array $data)
+    public function ajax($data)
     {
         header('Content-Type:application/json; charset=utf-8');
         return json_encode($data, JSON_UNESCAPED_UNICODE);
@@ -290,50 +260,78 @@ class WebApp
         }
 //        $action = (!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO'])) ? '/' : rtrim($_SERVER['PATH_INFO'], '/');
 
-
         //请求方式
         $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
         //路由查找
         $route_keys = array_keys($this->_routes[$method]);
         $flag = false;
+        $handle_result = '';
         foreach ($route_keys as $route_key) {
             preg_match('#^' . $route_key . '$#is', $action, $all);
-            if (!empty($all)) {
-                //执行中间件中的处理函数
-                foreach ($this->_middlewares as $middleware) {
-                    $middleware = $middleware->bindTo($this);
-                    $middleware($route_key, $all);
-                }
-                $handler = $this->_routes[$method][$route_key]['handle'];
-                $this->exec($handler);
-                $flag = true;
-                break;
+            if (empty($all)) {
+                continue;
             }
+            $flag = true;
+            $middleware_result = true;
+            // 执行中间件中的处理函数
+            $this->_middleware = array_merge($this->_middleware, $this->_routes[$method][$route_key]['middleware']);
+            foreach ($this->_middleware as $middleware) {
+//                $middleware_result = $middleware($route_key, $all);
+                $middleware_result = $this->exec($middleware, $all);
+                if ($middleware_result !== true) {
+                    break;
+                }
+            }
+            if ($middleware_result === true) {
+                $handle_result = $this->exec($this->_routes[$method][$route_key]['handle'], $all);
+            } else {
+                $handle_result = $middleware_result;
+            }
+
+            break;
         }
         if (false === $flag) {
             echo $this->error('接口不存在');
+        } else {
+            echo $this->ajax($handle_result);
         }
     }
 
     /**
      * 执行处理器
      * @param $handler
-     * @param array $param
+     * @param array $params
+     * @return mixed|null
+     * @throws \ReflectionException
      */
-    protected function exec($handler, $param = [])
+    protected function exec($handler, $params = [])
     {
         if ($handler instanceof \Closure) {
-            $handler($param);
+            $a = new \ReflectionFunction($handler);
+            $di = [];
+            foreach ($a->getParameters() as $parameter) {
+                if ($parameter->hasType()) {
+                    $className = $parameter->getType()->getName();
+                    if (isset($this->_dependency_injections[$className])) {
+                        $di[] = $this->_dependency_injections[$className];
+                    }
+                }
+            }
+            $di = array_merge($di, $params);
+            return $a->invokeArgs($di);
         } else if (is_object($handler)) {
-            $handler($param);
+            return $handler($params);
         } else if (is_string($handler)) {
             $handler = new $handler;
-            $handler($param);
+            return $handler($params);
         } else if (is_array($handler)) {
-            if (is_object($handler[1])) {
-                $controller = new $handler
+            if (is_object($handler[0])) {
+                return $handler[0]->{$handler[1]}($params);
+            } else if (is_string($handler[0])) {
+                $controller = new $handler[0]();
+                return $controller->{$handler[1]}($params);
             }
-
         }
+        return null;
     }
 }

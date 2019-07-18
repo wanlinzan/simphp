@@ -1,81 +1,64 @@
 <?php
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+function p($var)
+{
+    echo '<pre style="background:#eee;padding:10px;margin:10px;">';
+    if (is_null($var) || is_bool($var)) {
+        var_dump($var);
+    } else {
+        print_r($var);
+    }
+    echo '</pre>';
+}
 
 include './src/WebApp.php';
 
-class Action
-{
-    public function xxx()
-    {
-        echo '你好xxxx';
-    }
-
-    public function __invoke()
-    {
-        // TODO: Implement __invoke() method.
-        $this->xxx();
-    }
-}
-
-function aaa()
-{
-    echo 'aaa';
-}
-
 $webApp = new \Simphp\WebApp();
 
+//$webApp->addMiddleware(new Auth);
+
 $webApp->get('/login', function () {
-    echo 'admin/login';
-});
-$webApp->group('/admin', function (\Simphp\WebApp $webApp) {
-    $webApp->get('/login', function () {
-        echo 'admin/login';
-    });
-    $webApp->group('/level0', function (\Simphp\WebApp $webApp) {
-        $webApp->get('/login', Action::class);
-        $webApp->get('/logout', function () {
-            echo 'admin/login';
-        });
-    });
-    $webApp->get('/logout', function () {
-        echo 'admin/login';
-    });
-    $webApp->group('/level1', function (\Simphp\WebApp $webApp) {
-        $webApp->get('/login', function () {
-            echo 'admin/login';
-        }, [new \Simphp\WebApp()]);
-        $webApp->get('/logout', function () {
-            echo 'admin/login';
-        });
-    }, [function () {
-        echo 'admin/level1的中间件';
-    }]);
-    $webApp->group('/level2', function (\Simphp\WebApp $webApp) {
-        $webApp->get('/login', function () {
-            echo 'admin/login';
-        });
-        $webApp->get('/logout', function () {
-            echo 'admin/login';
-        });
-    });
-}, [function () {
-    echo 'admin的中间件';
-}]);
-$webApp->get('/logout', function () {
-    echo 'admin/login';
+    return 'login';
 });
 
-$webApp->get('/erson', function () {
-    echo 'admin/login';
-}, [function () {
-    echo 'ersonn的中间件';
-}]);
 
+$webApp->setDependencyInjection(Auth::class, new Auth);
 
-$webApp->addMiddleware(function () {
-    echo '全局中间件';
+class Auth
+{
+    public function __invoke()
+    {
+        if (isset($_SESSION['user_id']) && $_SESSION['user_id']) {
+            return true;
+        } else {
+            return [
+                'status' => 'not_login',
+                'message' => '还没有登录呢'
+            ];
+        }
+    }
+}
+
+// 用户相关路由
+$webApp->group('/user', function (\Simphp\WebApp $webApp) {
+
+    $webApp->get('/info/(\d+)/(\d+)', function (Auth $auth, $args) {
+
+        var_dump($auth);
+        var_dump($args);
+
+        return [
+            'status' => 'success',
+            'data' => '你好，哈哈哈'
+        ];
+    });
+
 });
 
-//print_r($webApp);
+$webApp->get('/class', function () {
+
+});
+
+
 $webApp->run();
