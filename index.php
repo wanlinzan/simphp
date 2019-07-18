@@ -22,13 +22,26 @@ $webApp->get('/login', function () {
     return 'login';
 });
 
+class A
+{
 
-$webApp->setDependencyInjection(Auth::class, new Auth);
+}
+
+class B
+{
+
+}
+
+
+$webApp->setDependencyInjection(A::class, new A);
+$webApp->setDependencyInjection(B::class, new B);
 
 class Auth
 {
-    public function __invoke()
+    public function __invoke(B $b, A $a)
     {
+        p($a);
+        P($b);
         if (isset($_SESSION['user_id']) && $_SESSION['user_id']) {
             return true;
         } else {
@@ -38,27 +51,22 @@ class Auth
             ];
         }
     }
+
+    public function login(A $a, B $b)
+    {
+        return [
+            'a' => get_class($a),
+            'b' => get_class($b)
+        ];
+
+//        return 'auth login';
+    }
 }
 
-// 用户相关路由
-$webApp->group('/user', function (\Simphp\WebApp $webApp) {
-
-    $webApp->get('/info/(\d+)/(\d+)', function (Auth $auth, $args) {
-
-        var_dump($auth);
-        var_dump($args);
-
-        return [
-            'status' => 'success',
-            'data' => '你好，哈哈哈'
-        ];
-    });
-
-});
-
-$webApp->get('/class', function () {
-
-});
+$webApp->get('/class', Auth::class);
+$webApp->get('/object', new Auth());
+$webApp->get('/object_controller', [new Auth(), 'login']);
+$webApp->get('/class_controller', [Auth::class, 'login']);
 
 
 $webApp->run();
