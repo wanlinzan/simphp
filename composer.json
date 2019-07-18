@@ -1,0 +1,20 @@
+{
+  "name": "wanlinzan/simphp",
+  "type": "framework",
+  "description": "simphp",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Wan LinZan",
+      "email": "799034851@qq.com"
+    }
+  ],
+  "require": {
+    "php":">=7.0.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Wanlinzan\\": "/src"
+    }
+  }
+}

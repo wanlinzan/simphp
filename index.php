@@ -1,12 +1,9 @@
 <?php
-define('ROOT_PATH','./');
-session_start();
-include './simphp/autoload.php';
-$app = new \simphp\App();
+ini_set('display_errors',1);
+error_reporting(E_ALL);
+include './vendor/autoload.php';
 
-$app->get('/', function () {
-    
-    p_const();
-});
+$app = new \Wanlinzan\App();
 
-$app->run();
+echo '<pre>';
+print_r($app);
