@@ -1,6 +1,6 @@
 <?php
 
-namespace Wanlinzan;
+namespace Simphp;
 
 class App
 {
