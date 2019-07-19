@@ -1,6 +1,6 @@
 <?php
 
-namespace Simphp;
+namespace simphp;
 
 
 use Monolog\Formatter\LineFormatter;
