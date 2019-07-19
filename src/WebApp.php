@@ -96,7 +96,7 @@ class WebApp
         // 注册依赖的服务提供者
         $this->register(\Monolog\Logger::class, function () use ($config) {
             $logger = new \Monolog\Logger('my_logger');
-            $stream = new \Monolog\Handler\StreamHandler($config['log_dir'] . '/' . date('Ymd') . '.txt');
+            $stream = new \Monolog\Handler\StreamHandler($config['log_dir'] . '/' . date('Ymd') . '.log');
             $output = "[%datetime%]%level_name%: %message% %context% %extra%\n";
             $formatter = new LineFormatter($output);
             $stream->setFormatter($formatter);
