@@ -60,6 +60,10 @@ class WebApp
         'DELETE' => []
     ];
 
+    /**
+     * WebApp constructor.
+     * @param null $config_dir
+     */
     public function __construct($config_dir = null)
     {
         // 配置文件目录
@@ -74,6 +78,9 @@ class WebApp
         $this->_init();
     }
 
+    /**
+     * 初始化
+     */
     private function _init()
     {
         $config = $this->getService(Config::class);
@@ -134,6 +141,7 @@ class WebApp
     }
 
     /**
+     * 获取服务
      * @param $name
      * @return mixed
      */
@@ -148,7 +156,47 @@ class WebApp
             return $this->_services[$name];
         }
 
-        return null;
+        return $this->make($name);
+    }
+
+    /**
+     * 实列化类
+     * @param $className
+     * @return mixed
+     */
+    public function make($className)
+    {
+        try {
+            $reflectionClass = new \ReflectionClass($className);
+
+            $params = [];
+
+            $reflectionMethod = $reflectionClass->getConstructor();
+
+            if (!is_null($reflectionMethod)) {
+
+                $parameters = $reflectionMethod->getParameters();
+
+                foreach ($parameters as $parameter) {
+
+                    if ($parameter->getClass()) {
+                        $params[] = $this->getService($parameter->getClass()->getName());
+                    } else if ($parameter->isDefaultValueAvailable()) {
+                        $params[] = $parameter->getDefaultValue();
+                    } else if ($parameter->isArray()) {
+                        $params[] = [];
+                    } else {
+                        $params[] = '';
+                    }
+                }
+            }
+
+            $this->_services[$className] = $reflectionClass->newInstanceArgs($params);
+
+            return $this->_services[$className];
+        } catch (\Exception $e) {
+            exit($e->getMessage());
+        }
     }
 
     /**
@@ -345,7 +393,7 @@ class WebApp
         } else {
             $action = '/';
         }
-//        $action = (!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO'])) ? '/' : rtrim($_SERVER['PATH_INFO'], '/');
+        //$action = (!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO'])) ? '/' : rtrim($_SERVER['PATH_INFO'], '/');
 
         //请求方式
         $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
@@ -384,17 +432,18 @@ class WebApp
     }
 
     /**
-     * 执行处理器
+     * 执行处理器,指定中间件，控制器，闭包
      * @param $handler
-     * @param array $params
+     * @param array $param
      * @return mixed|null
      */
-    protected function exec($handler, $params = [])
+    protected function exec($handler, $param)
     {
         try {
             if ($handler instanceof \Closure) {
                 $reflectionFunction = new \ReflectionFunction($handler);
-                $params = array_merge($this->_getDependencies($reflectionFunction->getParameters()), $params);
+                $params = $this->_getDependencies($reflectionFunction->getParameters());
+                $params[] = $param;
                 return $reflectionFunction->invokeArgs($params);
             }
 
@@ -404,22 +453,20 @@ class WebApp
 
             // 类名转换成对象
             if (is_string($handler[0])) {
-                $handler[0] = new $handler[0];
+                $handler[0] = $this->getService($handler[0]);
             }
 
             $reflection = new \ReflectionObject($handler[0]);
             if ($reflection->hasMethod($handler[1])) {
                 $reflectionMethod = $reflection->getMethod($handler[1]);
-                $params = array_merge($this->_getDependencies($reflectionMethod->getParameters()), $params);
+                $params = $this->_getDependencies($reflectionMethod->getParameters());
+                $params[] = $param;
                 return $reflectionMethod->invokeArgs($handler[0], $params);
             }
 
             return null;
         } catch (\Exception $e) {
-            return [
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ];
+            return $this->error($e->getMessage());
         }
     }
 
@@ -429,12 +476,12 @@ class WebApp
      * @return array
      * @throws \Exception
      */
-    private function _getDependencies($dependencies = [])
+    protected function _getDependencies($dependencies = [])
     {
         $di = [];
         foreach ($dependencies as $parameter) {
-            if ($parameter->hasType()) {
-                $className = $parameter->getType()->getName();
+            if ($parameter->getClass()) {
+                $className = $parameter->getClass()->getName();
                 $di[] = $this->getService($className);
             }
         }

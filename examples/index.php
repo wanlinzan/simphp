@@ -12,7 +12,7 @@ function p($var)
     echo '</pre>';
 }
 
-include './src/WebApp.php';
+include '../src/WebApp.php';
 //include './src/Providers/Logger.php';
 
 $webApp = new \Simphp\WebApp();
