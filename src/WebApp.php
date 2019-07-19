@@ -4,18 +4,15 @@ namespace Simphp;
 
 
 use Monolog\Formatter\LineFormatter;
+use Noodlehaus\Config;
 
 class WebApp
 {
     /**
-     * 配置项
-     * @var array
+     * 配置文件所在的目录
+     * @var string
      */
-    protected $_config = [
-        'debug' => true,
-        'log_write' => true,
-        'log_dir' => '',// 日志写入路径
-    ];
+    protected $_config_dir = __DIR__ . '/config';
 
     /**
      * 中间件
@@ -63,15 +60,25 @@ class WebApp
         'DELETE' => []
     ];
 
-    public function __construct(array $config = [])
+    public function __construct($config_dir = null)
     {
-        $this->_config = array_merge($this->_config, $config);
+        // 配置文件目录
+        if (!is_null($config_dir)) {
+            $this->_config_dir = $config_dir;
+        }
+
+        // 注册配置读取服务提供者
+        $this->register(Config::class, new Config($this->_config_dir));
+
+        // 初始化
         $this->_init();
     }
 
     private function _init()
     {
-        if ($this->_config['debug']) {
+        $config = $this->getService(Config::class);
+
+        if ($config['debug']) {
             ini_set('display_errors', true);
             error_reporting(E_ALL);
         } else {
@@ -80,9 +87,9 @@ class WebApp
         }
 
         // 注册依赖的服务提供者
-        $this->register(\Monolog\Logger::class, function () {
+        $this->register(\Monolog\Logger::class, function () use ($config) {
             $logger = new \Monolog\Logger('my_logger');
-            $stream = new \Monolog\Handler\StreamHandler($this->_config['log_dir'] . '/' . date('Ymd') . '.txt');
+            $stream = new \Monolog\Handler\StreamHandler($config['log_dir'] . '/' . date('Ymd') . '.txt');
             $output = "[%datetime%]%level_name%: %message% %context% %extra%\n";
             $formatter = new LineFormatter($output);
             $stream->setFormatter($formatter);
@@ -90,20 +97,21 @@ class WebApp
             return $logger;
         });
 
-        if ($this->_config['log_write']) {
+        // 日志服务
+        if ($config['log_write']) {
             $logger = $this->getService(\Monolog\Logger::class);
-            set_error_handler(function ($errno, $errstr, $errfile, $errline) use ($logger) {
+            set_error_handler(function ($errno, $errstr, $errfile, $errline) use ($logger, $config) {
                 $logger->info(error_get_last());
                 $logger->info($errfile . '[' . $errline . ']' . ':' . $errstr);
 
-                if ($this->_config['debug']) {
+                if ($config['debug']) {
                     echo $errfile . '[' . $errline . ']' . ':' . $errstr;
                 }
             });
-            set_exception_handler(function ($e) use ($logger) {
+            set_exception_handler(function ($e) use ($logger, $config) {
                 $logger->info(error_get_last());
                 $logger->info($e->getFile() . '[' . $e->getLine() . ']' . ':' . $e->getMessage());
-                if ($this->_config['debug']) {
+                if ($config['debug']) {
                     echo $e->getFile() . '[' . $e->getLine() . ']' . ':' . $e->getMessage();
                 }
             });
