@@ -93,22 +93,14 @@ class WebApp
         if ($this->_config['log_write']) {
             $logger = $this->getService(\Monolog\Logger::class);
             set_error_handler(function ($errno, $errstr, $errfile, $errline) use ($logger) {
-
                 $logger->info(error_get_last());
-
-//                p_log('--------------------');
-//                p_log(error_get_last());
-//                p_log('[' . date('Y-m-d H:i:s') . ']' . $errfile . '[' . $errline . ']:' . $errstr);
+                $logger->info($errfile . '[' . $errline . ']' . ':' . $errstr);
             });
             set_exception_handler(function ($e) use ($logger) {
                 $logger->info(error_get_last());
-//                p_log('--------------------');
-//
-//                p_log('[' . date('Y-m-d H:i:s') . ']' . $e->getFile() . '[' . $e->getLine() . ']:' . $e->getMessage());
+                $logger->info($e->getFile() . '[' . $e->getLine() . ']' . ':' . $e->getMessage());
             });
         }
-
-
     }
 
     /**
