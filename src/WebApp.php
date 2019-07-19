@@ -97,25 +97,24 @@ class WebApp
             return $logger;
         });
 
-        // 日志服务
-        if ($config['log_write']) {
+        // 错误处理
+        set_error_handler(function ($err_no, $err_str, $err_file, $err_line) use ($config) {
             $logger = $this->getService(\Monolog\Logger::class);
-            set_error_handler(function ($errno, $errstr, $errfile, $errline) use ($logger, $config) {
-                $logger->info(error_get_last());
-                $logger->info($errfile . '[' . $errline . ']' . ':' . $errstr);
+            $logger->info(error_get_last());
+            $logger->info($err_file . '[' . $err_line . ']' . ':' . $err_str);
 
-                if ($config['debug']) {
-                    echo $errfile . '[' . $errline . ']' . ':' . $errstr;
-                }
-            });
-            set_exception_handler(function ($e) use ($logger, $config) {
-                $logger->info(error_get_last());
-                $logger->info($e->getFile() . '[' . $e->getLine() . ']' . ':' . $e->getMessage());
-                if ($config['debug']) {
-                    echo $e->getFile() . '[' . $e->getLine() . ']' . ':' . $e->getMessage();
-                }
-            });
-        }
+            if ($config['debug']) {
+                echo $err_file . '[' . $err_line . ']' . ':' . $err_str;
+            }
+        });
+        set_exception_handler(function ($e) use ($config) {
+            $logger = $this->getService(\Monolog\Logger::class);
+            $logger->info(error_get_last());
+            $logger->info($e->getFile() . '[' . $e->getLine() . ']' . ':' . $e->getMessage());
+            if ($config['debug']) {
+                echo $e->getFile() . '[' . $e->getLine() . ']' . ':' . $e->getMessage();
+            }
+        });
     }
 
     /**
