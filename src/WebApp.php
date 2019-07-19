@@ -3,6 +3,8 @@
 namespace Simphp;
 
 
+use Monolog\Formatter\LineFormatter;
+
 class WebApp
 {
     /**
@@ -11,7 +13,8 @@ class WebApp
      */
     protected $_config = [
         'debug' => true,
-        'write_log' => true
+        'log_write' => true,
+        'log_dir' => '',// 日志写入路径
     ];
 
     /**
@@ -79,11 +82,15 @@ class WebApp
         // 注册依赖的服务提供者
         $this->register(\Monolog\Logger::class, function () {
             $logger = new \Monolog\Logger('my_logger');
-            $logger->pushHandler(new \Monolog\Handler\StreamHandler(__DIR__ . '/a.txt'));
+            $stream = new \Monolog\Handler\StreamHandler($this->_config['log_dir'] . '/' . date('Ymd') . '.txt');
+            $output = "[%datetime%]%level_name%: %message% %context% %extra%\n";
+            $formatter = new LineFormatter($output);
+            $stream->setFormatter($formatter);
+            $logger->pushHandler($stream);
             return $logger;
         });
 
-        if ($this->_config['write_log']) {
+        if ($this->_config['log_write']) {
             $logger = $this->getService(\Monolog\Logger::class);
             set_error_handler(function ($errno, $errstr, $errfile, $errline) use ($logger) {
 
@@ -100,6 +107,8 @@ class WebApp
 //                p_log('[' . date('Y-m-d H:i:s') . ']' . $e->getFile() . '[' . $e->getLine() . ']:' . $e->getMessage());
             });
         }
+
+
     }
 
     /**
@@ -121,7 +130,6 @@ class WebApp
     /**
      * @param $name
      * @return mixed
-     * @throws \Exception
      */
     public function getService($name)
     {
@@ -134,7 +142,7 @@ class WebApp
             return $this->_services[$name];
         }
 
-        throw new \Exception('代码错误：' . $name . '服务未提供');
+        return null;
     }
 
     /**
