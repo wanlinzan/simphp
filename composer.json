@@ -12,7 +12,8 @@
   "require": {
     "php":">=7.1.0",
     "ext-json":"^1.0",
-    "catfan/medoo": "^1.7"
+    "catfan/medoo": "^1.7",
+    "monolog/monolog": "^1.24"
   },
   "autoload": {
     "psr-4": {

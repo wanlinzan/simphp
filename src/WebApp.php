@@ -2,13 +2,17 @@
 
 namespace Simphp;
 
+
 class WebApp
 {
     /**
      * 配置项
      * @var array
      */
-    protected $_config = [];
+    protected $_config = [
+        'debug' => true,
+        'write_log' => true
+    ];
 
     /**
      * 中间件
@@ -16,11 +20,20 @@ class WebApp
      */
     protected $_middleware = [];
 
+
     /**
-     * 依赖注入
+     * 服务提供者，闭包函数提供
      * @var array
      */
-    protected $_dependency_injections = [];
+    protected $_service_providers = [
+
+    ];
+
+    /**
+     * 注册的所有服务
+     * @var array
+     */
+    protected $_services = [];
 
     /**
      * 当前路由前缀
@@ -50,18 +63,76 @@ class WebApp
     public function __construct(array $config = [])
     {
         $this->_config = array_merge($this->_config, $config);
+        $this->_init();
+    }
+
+    private function _init()
+    {
+        if ($this->_config['debug']) {
+            ini_set('display_errors', true);
+            error_reporting(E_ALL);
+        } else {
+            ini_set('display_errors', false);
+            error_reporting(0);
+        }
+
+        // 注册依赖的服务提供者
+        $this->register(\Monolog\Logger::class, function () {
+            return new \Monolog\Logger('my_logger', new \Monolog\Handler\StreamHandler(__DIR__ . '/a.txt'));
+        });
+
+        if ($this->_config['write_log']) {
+            $logger = $this->getService(\Monolog\Logger::class);
+            set_error_handler(function ($errno, $errstr, $errfile, $errline) use ($logger) {
+
+                $logger->info(error_get_last());
+
+//                p_log('--------------------');
+//                p_log(error_get_last());
+//                p_log('[' . date('Y-m-d H:i:s') . ']' . $errfile . '[' . $errline . ']:' . $errstr);
+            });
+            set_exception_handler(function ($e) use ($logger){
+                $logger->info(error_get_last());
+//                p_log('--------------------');
+//
+//                p_log('[' . date('Y-m-d H:i:s') . ']' . $e->getFile() . '[' . $e->getLine() . ']:' . $e->getMessage());
+            });
+        }
     }
 
     /**
      * 依赖注入
      * @param $name
-     * @param $object
+     * @param $handler
      * @return $this
      */
-    public function setDependencyInjection($name, $object)
+    public function register($name, $handler)
     {
-        $this->_dependency_injections[$name] = $object;
+        if ($handler instanceof \Closure) {
+            $this->_service_providers[$name] = $handler;
+        } else {
+            $this->_services[$name] = $handler;
+        }
         return $this;
+    }
+
+    /**
+     * @param $name
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getService($name)
+    {
+        if (isset($this->_services[$name])) {
+            return $this->_services[$name];
+        }
+
+        if (isset($this->_service_providers[$name])) {
+            $this->_services[$name] = $this->_service_providers[$name]();
+            return $this->_services[$name];
+        }
+
+        throw new \Exception('代码错误：' . $name . '服务未提供');
     }
 
     /**
@@ -348,11 +419,7 @@ class WebApp
         foreach ($dependencies as $parameter) {
             if ($parameter->hasType()) {
                 $className = $parameter->getType()->getName();
-                if (isset($this->_dependency_injections[$className])) {
-                    $di[] = $this->_dependency_injections[$className];
-                } else {
-                    throw new \Exception('代码错误：' . $className . '服务未提供');
-                }
+                $di[] = $this->getService($className);
             }
         }
         return $di;
