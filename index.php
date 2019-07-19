@@ -18,9 +18,6 @@ $webApp = new \Simphp\WebApp();
 
 //$webApp->addMiddleware(new Auth);
 
-$webApp->get('/login', function () {
-    return 'login';
-});
 
 class A
 {
@@ -34,7 +31,8 @@ class B
 
 
 $webApp->setDependencyInjection(A::class, new A);
-$webApp->setDependencyInjection(B::class, new B);
+//$webApp->setDependencyInjection(B::class, new B);
+$webApp->setDependencyInjection(Auth::class, new Auth());
 
 class Auth
 {
@@ -66,7 +64,12 @@ class Auth
 $webApp->get('/class', Auth::class);
 $webApp->get('/object', new Auth());
 $webApp->get('/object_controller', [new Auth(), 'login']);
-$webApp->get('/class_controller', [Auth::class, 'login']);
+$webApp->get('/class_controller', ['xxfsjfs', 'login']);
 
+$webApp->get('/login', function (Auth $auth, $args) {
+    p($auth);
+    p($args);
+    return 'login';
+});
 
 $webApp->run();

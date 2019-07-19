@@ -305,95 +305,56 @@ class WebApp
     protected function exec($handler, $params = [])
     {
         try {
-
-
             if ($handler instanceof \Closure) {
-                $reflection = new \ReflectionFunction($handler);
-                $di = [];
-                foreach ($reflection->getParameters() as $parameter) {
-                    if ($parameter->hasType()) {
-                        $className = $parameter->getType()->getName();
-                        if (isset($this->_dependency_injections[$className])) {
-                            $di[] = $this->_dependency_injections[$className];
-                        }
-                    }
-                }
-                $di = array_merge($di, $params);
-                return $reflection->invokeArgs($di);
-            } else if (is_object($handler)) {
-
-                $reflection = new \ReflectionObject($handler);
-                $di = [];
-                if ($reflection->hasMethod('__invoke')) {
-                    $construct = $reflection->getMethod('__invoke');
-                    foreach ($construct->getParameters() as $parameter) {
-                        if ($parameter->hasType()) {
-                            $className = $parameter->getType()->getName();
-                            if (isset($this->_dependency_injections[$className])) {
-                                $di[] = $this->_dependency_injections[$className];
-                            }
-                        }
-                    }
-                    $di = array_merge($di, $params);
-                    return $construct->invokeArgs($handler, $di);
-                }
-
-            } else if (is_string($handler)) {
-                $handler = new $handler;
-                $reflection = new \ReflectionObject($handler);
-                $di = [];
-                if ($reflection->hasMethod('__invoke')) {
-                    $construct = $reflection->getMethod('__invoke');
-                    foreach ($construct->getParameters() as $parameter) {
-                        if ($parameter->hasType()) {
-                            $className = $parameter->getType()->getName();
-                            if (isset($this->_dependency_injections[$className])) {
-                                $di[] = $this->_dependency_injections[$className];
-                            }
-                        }
-                    }
-                    $di = array_merge($di, $params);
-                    return $construct->invokeArgs($handler, $di);
-                }
-            } else if (is_array($handler)) {
-                if (is_object($handler[0])) {
-                    $reflection = new \ReflectionObject($handler[0]);
-                    $di = [];
-                    if ($reflection->hasMethod($handler[1])) {
-                        $construct = $reflection->getMethod($handler[1]);
-                        foreach ($construct->getParameters() as $parameter) {
-                            if ($parameter->hasType()) {
-                                $className = $parameter->getType()->getName();
-                                if (isset($this->_dependency_injections[$className])) {
-                                    $di[] = $this->_dependency_injections[$className];
-                                }
-                            }
-                        }
-                        $di = array_merge($di, $params);
-                        return $construct->invokeArgs($handler[0], $di);
-                    }
-                } else if (is_string($handler[0])) {
-                    $controller = new $handler[0]();
-                    $reflection = new \ReflectionObject($controller);
-                    $di = [];
-                    if ($reflection->hasMethod($handler[1])) {
-                        $construct = $reflection->getMethod($handler[1]);
-                        foreach ($construct->getParameters() as $parameter) {
-                            if ($parameter->hasType()) {
-                                $className = $parameter->getType()->getName();
-                                if (isset($this->_dependency_injections[$className])) {
-                                    $di[] = $this->_dependency_injections[$className];
-                                }
-                            }
-                        }
-                        $di = array_merge($di, $params);
-                        return $construct->invokeArgs($controller, $di);
-                    }
-                }
+                $reflectionFunction = new \ReflectionFunction($handler);
+                $params = array_merge($this->_getDependencies($reflectionFunction->getParameters()), $params);
+                return $reflectionFunction->invokeArgs($params);
             }
+
+            if (!is_array($handler)) {
+                $handler = [$handler, '__invoke'];
+            }
+
+            // 类名转换成对象
+            if (is_string($handler[0])) {
+                $handler[0] = new $handler[0];
+            }
+
+            $reflection = new \ReflectionObject($handler[0]);
+            if ($reflection->hasMethod($handler[1])) {
+                $reflectionMethod = $reflection->getMethod($handler[1]);
+                $params = array_merge($this->_getDependencies($reflectionMethod->getParameters()), $params);
+                return $reflectionMethod->invokeArgs($handler[0], $params);
+            }
+
             return null;
         } catch (\Exception $e) {
-            return $e->getMessage();
+            return [
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ];
         }
+    }
+
+    /**
+     *  获取函数，类方法的依赖参数
+     * @param array $dependencies
+     * @return array
+     * @throws \Exception
+     */
+    private function _getDependencies($dependencies = [])
+    {
+        $di = [];
+        foreach ($dependencies as $parameter) {
+            if ($parameter->hasType()) {
+                $className = $parameter->getType()->getName();
+                if (isset($this->_dependency_injections[$className])) {
+                    $di[] = $this->_dependency_injections[$className];
+                } else {
+                    throw new \Exception('代码错误：' . $className . '服务未提供');
+                }
+            }
+        }
+        return $di;
     }
 }
