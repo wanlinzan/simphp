@@ -78,7 +78,9 @@ class WebApp
 
         // 注册依赖的服务提供者
         $this->register(\Monolog\Logger::class, function () {
-            return new \Monolog\Logger('my_logger', new \Monolog\Handler\StreamHandler(__DIR__ . '/a.txt'));
+            $logger = new \Monolog\Logger('my_logger');
+            $logger->pushHandler(new \Monolog\Handler\StreamHandler(__DIR__ . '/a.txt'));
+            return $logger;
         });
 
         if ($this->_config['write_log']) {
@@ -91,7 +93,7 @@ class WebApp
 //                p_log(error_get_last());
 //                p_log('[' . date('Y-m-d H:i:s') . ']' . $errfile . '[' . $errline . ']:' . $errstr);
             });
-            set_exception_handler(function ($e) use ($logger){
+            set_exception_handler(function ($e) use ($logger) {
                 $logger->info(error_get_last());
 //                p_log('--------------------');
 //
