@@ -95,10 +95,17 @@ class WebApp
             set_error_handler(function ($errno, $errstr, $errfile, $errline) use ($logger) {
                 $logger->info(error_get_last());
                 $logger->info($errfile . '[' . $errline . ']' . ':' . $errstr);
+
+                if ($this->_config['debug']) {
+                    echo $errfile . '[' . $errline . ']' . ':' . $errstr;
+                }
             });
             set_exception_handler(function ($e) use ($logger) {
                 $logger->info(error_get_last());
                 $logger->info($e->getFile() . '[' . $e->getLine() . ']' . ':' . $e->getMessage());
+                if ($this->_config['debug']) {
+                    echo $e->getFile() . '[' . $e->getLine() . ']' . ':' . $e->getMessage();
+                }
             });
         }
     }
