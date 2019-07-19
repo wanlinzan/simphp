@@ -2,6 +2,11 @@
   "name": "wanlinzan/simphp",
   "type": "framework",
   "description": "simphp",
+  "keywords": [
+    "PHP framework",
+    "IOC",
+    "Route"
+  ],
   "license": "MIT",
   "authors": [
     {
@@ -10,8 +15,8 @@
     }
   ],
   "require": {
-    "php":">=7.1.0",
-    "ext-json":"^1.0",
+    "php": ">=7.1.0",
+    "ext-json": "^1.0",
     "monolog/monolog": "^1.24",
     "hassankhan/config": "^2.0"
   },
