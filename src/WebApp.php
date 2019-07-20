@@ -308,7 +308,9 @@ class WebApp
      */
     public function map(array $methods, $route, $handle, $middleware = [])
     {
-        $middleware = (array)$middleware;
+        if (!is_array($middleware)) {
+            $middleware = [$middleware];
+        }
         foreach ($methods as $method) {
             $this->_routes[$method][$this->_current_route_prefix . $route] = [
                 'handle' => $handle,
