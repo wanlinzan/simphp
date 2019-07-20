@@ -380,7 +380,9 @@ class WebApp
     public function run()
     {
         //获取 action
-        if (isset($_SERVER['REQUEST_URI'])) {
+        if (isset($_SERVER['PATH_INFO'])) {
+            $action = (!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO'])) ? '/' : rtrim($_SERVER['PATH_INFO'], '/');
+        } else if (isset($_SERVER['REQUEST_URI'])) {
             $params = parse_url($_SERVER['REQUEST_URI']);
             $action = isset($params['path']) ? rtrim($params['path'], '/') : '/';
             if (isset($_SERVER['SCRIPT_NAME'][0])) {
@@ -390,10 +392,12 @@ class WebApp
                     $action = (string)substr($action, strlen(dirname($_SERVER['SCRIPT_NAME'])));
                 }
             }
+            if ($action == '') {
+                $action = '/';
+            }
         } else {
             $action = '/';
         }
-        //$action = (!isset($_SERVER['PATH_INFO']) || empty($_SERVER['PATH_INFO'])) ? '/' : rtrim($_SERVER['PATH_INFO'], '/');
 
         //请求方式
         $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
