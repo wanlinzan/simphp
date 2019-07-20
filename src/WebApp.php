@@ -223,7 +223,6 @@ class WebApp
      */
     public function get($route, $handle, $middleware = [])
     {
-        $middleware = (array)$middleware;
         $this->map(['GET'], $route, $handle, $middleware);
     }
 
@@ -235,7 +234,6 @@ class WebApp
      */
     public function post($route, $handle, $middleware = [])
     {
-        $middleware = (array)$middleware;
         $this->map(['POST'], $route, $handle, $middleware);
     }
 
@@ -247,7 +245,6 @@ class WebApp
      */
     public function put($route, $handle, $middleware = [])
     {
-        $middleware = (array)$middleware;
         $this->map(['PUT'], $route, $handle, $middleware);
     }
 
@@ -259,7 +256,6 @@ class WebApp
      */
     public function patch($route, $handle, $middleware = [])
     {
-        $middleware = (array)$middleware;
         $this->map(['PATCH'], $route, $handle, $middleware);
     }
 
@@ -271,7 +267,6 @@ class WebApp
      */
     public function delete($route, $handle, $middleware = [])
     {
-        $middleware = (array)$middleware;
         $this->map(['DELETE'], $route, $handle, $middleware);
     }
 
@@ -283,7 +278,6 @@ class WebApp
      */
     public function options($route, $handle, $middleware = [])
     {
-        $middleware = (array)$middleware;
         $this->map(['OPTIONS'], $route, $handle, $middleware);
     }
 
@@ -295,7 +289,6 @@ class WebApp
      */
     public function any($route, $handle, $middleware = [])
     {
-        $middleware = (array)$middleware;
         $this->map(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], $route, $handle, $middleware);
     }
 
@@ -346,45 +339,6 @@ class WebApp
     }
 
     /**
-     * ajax 方法，用于输出数据
-     * @param array $data
-     * @return string
-     */
-    public function ajax($data)
-    {
-        header('Content-Type:application/json; charset=utf-8');
-        return json_encode($data, JSON_UNESCAPED_UNICODE);
-    }
-
-    /**
-     * ajax 的快捷方法
-     * @param string $message
-     * @param array $data
-     * @return string
-     */
-    public function success($message = '', $data = [])
-    {
-        return $this->ajax([
-            'status' => 'success',
-            'message' => $message,
-            'data' => $data
-        ]);
-    }
-
-    /**
-     * ajax 的快捷方法
-     * @param $message
-     * @return string
-     */
-    public function error($message)
-    {
-        return $this->ajax([
-            'status' => 'error',
-            'message' => $message
-        ]);
-    }
-
-    /**
      * 运行APP
      */
     public function run()
@@ -414,9 +368,7 @@ class WebApp
         //路由查找
         $route_keys = array_keys($this->_routes[$method]);
         $flag = false;
-        $handle_result = '';
         try {
-
 
             foreach ($route_keys as $route_key) {
                 preg_match('#^' . $route_key . '$#is', $action, $all);
@@ -434,20 +386,15 @@ class WebApp
                     }
                 }
                 if ($middleware_result === true) {
-                    $handle_result = $this->exec($this->_routes[$method][$route_key]['handle'], $all);
-                } else {
-                    $handle_result = $middleware_result;
+                    $this->exec($this->_routes[$method][$route_key]['handle'], $all);
                 }
-
                 break;
             }
             if (false === $flag) {
-                echo $this->error('接口不存在');
-            } else {
-                echo $this->ajax($handle_result);
+                echo '大兄弟，路由未找到！';
             }
         } catch (\Exception $e) {
-            echo $this->error($e->getMessage());
+            echo $e->getMessage();
         }
     }
 
