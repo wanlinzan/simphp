@@ -84,7 +84,7 @@ class WebApp
 
     /**
      * 初始化
-     * @throws \ReflectionException
+     * @throws \Exception
      */
     private function _init()
     {
@@ -97,6 +97,8 @@ class WebApp
             ini_set('display_errors', false);
             error_reporting(0);
         }
+
+        date_default_timezone_set($config['date_timezone']);
 
         // 注册依赖的服务提供者
         $this->register(\Monolog\Logger::class, function () use ($config) {
