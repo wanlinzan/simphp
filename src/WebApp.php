@@ -152,7 +152,7 @@ class WebApp
         }
 
         if (isset($this->_service_providers[$name])) {
-            $this->_services[$name] = $this->_service_providers[$name]();
+            $this->_services[$name] = $this->exec($this->_service_providers[$name]);
             return $this->_services[$name];
         }
 
@@ -441,13 +441,15 @@ class WebApp
      * @param array $param
      * @return mixed|null
      */
-    protected function exec($handler, $param)
+    protected function exec($handler, $param = null)
     {
         try {
             if ($handler instanceof \Closure) {
                 $reflectionFunction = new \ReflectionFunction($handler);
                 $params = $this->_getDependencies($reflectionFunction->getParameters());
-                $params[] = $param;
+                if (!is_null($param)) {
+                    $params[] = $param;
+                }
                 return $reflectionFunction->invokeArgs($params);
             }
 
@@ -464,7 +466,9 @@ class WebApp
             if ($reflection->hasMethod($handler[1])) {
                 $reflectionMethod = $reflection->getMethod($handler[1]);
                 $params = $this->_getDependencies($reflectionMethod->getParameters());
-                $params[] = $param;
+                if (!is_null($param)) {
+                    $params[] = $param;
+                }
                 return $reflectionMethod->invokeArgs($handler[0], $params);
             }
 
