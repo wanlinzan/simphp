@@ -22,6 +22,12 @@ class WebApp
 
 
     /**
+     * 异常处理函数
+     * @var null
+     */
+    protected $_exception_handler = null;
+
+    /**
      * 服务提供者，闭包函数提供
      * @var array
      */
@@ -129,6 +135,33 @@ class WebApp
                 echo $e->getFile() . '[' . $e->getLine() . ']' . ':' . $e->getMessage();
             }
         });
+    }
+
+    /**
+     * 设置异常处理器
+     * @param callable $handler
+     */
+    public function setExceptionHandler(callable $handler)
+    {
+        $this->_exception_handler = $handler;
+    }
+
+    /**
+     * 处理异常
+     * @param \Exception $exception
+     * @throws \Exception
+     */
+    private function handleException(\Exception $exception)
+    {
+        if (!is_null($this->_exception_handler)) {
+            try {
+                $this->exec($this->_exception_handler, $exception);
+            } catch (\Exception $e) {
+                throw $e;
+            }
+        } else {
+            throw $exception;
+        }
     }
 
     /**
@@ -367,9 +400,9 @@ class WebApp
         $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
         //路由查找
         $route_keys = array_keys($this->_routes[$method]);
-        $flag = false;
-        try {
 
+        try {
+            $flag = false;
             foreach ($route_keys as $route_key) {
                 preg_match('#^' . $route_key . '$#is', $action, $all);
                 if (empty($all)) {
@@ -394,7 +427,11 @@ class WebApp
                 echo '大兄弟，路由未找到！';
             }
         } catch (\Exception $e) {
-            echo $e->getMessage();
+            try {
+                $this->handleException($e);
+            } catch (\Exception $e) {
+                echo $e->getMessage();
+            }
         }
     }
 
