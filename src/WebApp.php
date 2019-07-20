@@ -328,6 +328,7 @@ class WebApp
         if (!is_array($middleware)) {
             $middleware = [$middleware];
         }
+
         // 路由
         $temp_route_prefix = $this->_current_route_prefix;
         $this->_current_route_prefix .= $route;
