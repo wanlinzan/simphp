@@ -74,12 +74,17 @@ class WebApp
         // 注册配置读取服务提供者
         $this->register(Config::class, new Config($this->_config_dir));
 
-        // 初始化
-        $this->_init();
+        try {
+            // 初始化
+            $this->_init();
+        } catch (\Exception $e) {
+            exit($e->getMessage());
+        }
     }
 
     /**
      * 初始化
+     * @throws \ReflectionException
      */
     private function _init()
     {
@@ -144,6 +149,7 @@ class WebApp
      * 获取服务
      * @param $name
      * @return mixed
+     * @throws \Exception
      */
     public function getService($name)
     {
@@ -163,40 +169,37 @@ class WebApp
      * 实列化类
      * @param $className
      * @return mixed
+     * @throws \Exception
      */
     public function make($className)
     {
-        try {
-            $reflectionClass = new \ReflectionClass($className);
+        $reflectionClass = new \ReflectionClass($className);
 
-            $params = [];
+        $params = [];
 
-            $reflectionMethod = $reflectionClass->getConstructor();
+        $reflectionMethod = $reflectionClass->getConstructor();
 
-            if (!is_null($reflectionMethod)) {
+        if (!is_null($reflectionMethod)) {
 
-                $parameters = $reflectionMethod->getParameters();
+            $parameters = $reflectionMethod->getParameters();
 
-                foreach ($parameters as $parameter) {
+            foreach ($parameters as $parameter) {
 
-                    if ($parameter->getClass()) {
-                        $params[] = $this->getService($parameter->getClass()->getName());
-                    } else if ($parameter->isDefaultValueAvailable()) {
-                        $params[] = $parameter->getDefaultValue();
-                    } else if ($parameter->isArray()) {
-                        $params[] = [];
-                    } else {
-                        $params[] = '';
-                    }
+                if ($parameter->getClass()) {
+                    $params[] = $this->getService($parameter->getClass()->getName());
+                } else if ($parameter->isDefaultValueAvailable()) {
+                    $params[] = $parameter->getDefaultValue();
+                } else if ($parameter->isArray()) {
+                    $params[] = [];
+                } else {
+                    $params[] = '';
                 }
             }
-
-            $this->_services[$className] = $reflectionClass->newInstanceArgs($params);
-
-            return $this->_services[$className];
-        } catch (\Exception $e) {
-            exit($e->getMessage());
         }
+
+        $this->_services[$className] = $reflectionClass->newInstanceArgs($params);
+
+        return $this->_services[$className];
     }
 
     /**
@@ -405,81 +408,84 @@ class WebApp
         $route_keys = array_keys($this->_routes[$method]);
         $flag = false;
         $handle_result = '';
-        foreach ($route_keys as $route_key) {
-            preg_match('#^' . $route_key . '$#is', $action, $all);
-            if (empty($all)) {
-                continue;
-            }
-            $flag = true;
-            $middleware_result = true;
-            // 执行中间件中的处理函数
-            $this->_middleware = array_merge($this->_middleware, $this->_routes[$method][$route_key]['middleware']);
-            foreach ($this->_middleware as $middleware) {
-                $middleware_result = $this->exec($middleware, $all);
-                if ($middleware_result !== true) {
-                    break;
-                }
-            }
-            if ($middleware_result === true) {
-                $handle_result = $this->exec($this->_routes[$method][$route_key]['handle'], $all);
-            } else {
-                $handle_result = $middleware_result;
-            }
+        try {
 
-            break;
-        }
-        if (false === $flag) {
-            echo $this->error('接口不存在');
-        } else {
-            echo $this->ajax($handle_result);
+
+            foreach ($route_keys as $route_key) {
+                preg_match('#^' . $route_key . '$#is', $action, $all);
+                if (empty($all)) {
+                    continue;
+                }
+                $flag = true;
+                $middleware_result = true;
+                // 执行中间件中的处理函数
+                $this->_middleware = array_merge($this->_middleware, $this->_routes[$method][$route_key]['middleware']);
+                foreach ($this->_middleware as $middleware) {
+                    $middleware_result = $this->exec($middleware, $all);
+                    if ($middleware_result !== true) {
+                        break;
+                    }
+                }
+                if ($middleware_result === true) {
+                    $handle_result = $this->exec($this->_routes[$method][$route_key]['handle'], $all);
+                } else {
+                    $handle_result = $middleware_result;
+                }
+
+                break;
+            }
+            if (false === $flag) {
+                echo $this->error('接口不存在');
+            } else {
+                echo $this->ajax($handle_result);
+            }
+        } catch (\Exception $e) {
+            echo $this->error($e->getMessage());
         }
     }
 
     /**
      * 执行处理器,指定中间件，控制器，闭包
      * @param $handler
-     * @param array $param
-     * @return mixed|null
+     * @param null $param
+     * @return mixed
+     * @throws \Exception
      */
     protected function exec($handler, $param = null)
     {
-        try {
-            if ($handler instanceof \Closure) {
-                $reflectionFunction = new \ReflectionFunction($handler);
-                $params = $this->_getDependencies($reflectionFunction->getParameters());
-                if (!is_null($param)) {
-                    $params[] = $param;
-                }
-                return $reflectionFunction->invokeArgs($params);
+        if ($handler instanceof \Closure) {
+            $reflectionFunction = new \ReflectionFunction($handler);
+            $params = $this->_getDependencies($reflectionFunction->getParameters());
+            if (!is_null($param)) {
+                $params[] = $param;
             }
-
-            if (!is_array($handler)) {
-                $handler = [$handler, '__invoke'];
-            }
-
-            // 类名转换成对象
-            if (is_string($handler[0])) {
-                $handler[0] = $this->getService($handler[0]);
-            }
-
-            $reflection = new \ReflectionObject($handler[0]);
-            if ($reflection->hasMethod($handler[1])) {
-                $reflectionMethod = $reflection->getMethod($handler[1]);
-                $params = $this->_getDependencies($reflectionMethod->getParameters());
-                if (!is_null($param)) {
-                    $params[] = $param;
-                }
-                return $reflectionMethod->invokeArgs($handler[0], $params);
-            }
-
-            return null;
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage());
+            return $reflectionFunction->invokeArgs($params);
         }
+
+        if (!is_array($handler)) {
+            $handler = [$handler, '__invoke'];
+        }
+
+        // 类名转换成对象
+        if (is_string($handler[0])) {
+            $handler[0] = $this->getService($handler[0]);
+        }
+
+        $reflection = new \ReflectionObject($handler[0]);
+        if ($reflection->hasMethod($handler[1])) {
+            $reflectionMethod = $reflection->getMethod($handler[1]);
+            $params = $this->_getDependencies($reflectionMethod->getParameters());
+            if (!is_null($param)) {
+                $params[] = $param;
+            }
+            return $reflectionMethod->invokeArgs($handler[0], $params);
+        }
+
+        throw new \Exception('不是一个可执行函数/方法');
     }
 
     /**
-     *  获取函数，类方法的依赖参数
+     * 获取函数，类方法的依赖参数
      * @param array $dependencies
      * @return array
      * @throws \Exception
