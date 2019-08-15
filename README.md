@@ -1,13 +1,12 @@
 # SimPHP 框架
 SimPHP 是一个简单而强大的PHP开发框架，他可以帮助你快速开发web应用程序。
-## 安装与使用
 
-###安装
+##安装
 ```base
 composer install wanlinzan/simphp
 ```
 
-###使用
+##使用
 ```php
 
 <?php
