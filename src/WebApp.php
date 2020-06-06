@@ -22,7 +22,7 @@ class WebApp
 
 
     /**
-     * 异常处理函数
+     * 异常处理器
      * @var null
      */
     protected $_exception_handler = null;
@@ -139,9 +139,9 @@ class WebApp
 
     /**
      * 设置异常处理器
-     * @param callable $handler
+     * @param $handler
      */
-    public function setExceptionHandler(callable $handler)
+    public function setExceptionHandler($handler)
     {
         $this->_exception_handler = $handler;
     }
